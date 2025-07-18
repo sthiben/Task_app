@@ -1,6 +1,6 @@
 import { Router } from "express";
 import TaskController from '../controllers/task.controller.js';
-import {verifyToken} from '../middleware/authMiddleware.js';
+import { verifyToken } from "../middleware/authMIddleware.js";
 
 const router = Router();
 const name="/task";
@@ -8,6 +8,9 @@ const name="/task";
 router.use(verifyToken);
 // Route for user registration and list
 router.route(name)
-    .post(TaskController.addTask);
+    .post(TaskController.addTask)
+    .get(TaskController.findTasks);
+
+router.get(`${name}/:taskId`, TaskController.findTaskById);
 
 export default router;

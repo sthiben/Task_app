@@ -1,5 +1,6 @@
 import TaskModel from '../models/task.model.js'; // Import the user model
 import { mongoose } from '../config/db/connection.js'; // Import mongoose from the connection
+import taskModel from '../models/task.model.js';
 
 class TaskController {
     // Create a new task
@@ -77,6 +78,52 @@ class TaskController {
                 details: error.errors
             });
         }
+    }
+
+    async findTasks(req, res){
+        try{
+            const taskModel = await TaskModel.find();
+            return res.status(200).json({
+                message: "Tasks retrieved successfully",
+                data: taskModel
+            })
+        }catch(error){
+            return res.status(500).json({
+                error: "Internal server error"
+            });
+        }
+    }
+
+    async findTaskById(req, res){
+        try{
+            const taskId = req.params.taskId;
+            console.log(taskId);
+            if(!taskId || taskId === ":taskId"){
+                return res.status(400).json({
+                    error: "Required fields are missing"
+                });
+            };
+
+            const taskFounded = await TaskModel.findOne({taskId});
+            if(!taskFounded){
+                throw new Error(`Task with ID: ${taskId} not found`);
+            }
+
+            return res.status(200).json({
+                message: "Task retrieved successfully",
+                data: taskFounded
+            });
+            
+        }catch(error){
+            if(error.message.includes("not found")){
+                return res.status(404).json({
+                    error: error.message
+                });
+            };
+            return res.status(500).json({
+                error: "Internal server error"
+            });
+    };
     }
 }
 
