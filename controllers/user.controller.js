@@ -25,7 +25,7 @@ class UserController {
             await newUserModel.save();
             return res.status(201).json({ message: 'User successfully registered' });
         } catch (err) {
-            res.status(400).json({ error: err.message });
+            return res.status(400).json({ error: err.message });
         }
     }
     // Users list
@@ -35,7 +35,72 @@ class UserController {
             if (!userModel) throw new Error('User not found');
             return res.status(200).json({ data: userModel });
         } catch (err) {
-            res.status(400).json({ error: err.message });
+            return res.status(400).json({ error: err.message });
+        }
+    };
+
+    // Get user by id
+    async showById(req, res) {
+        try {
+            const userId = req.params.userId;
+            const userModel = await UserModel.findById(userId);
+            if (!userModel) throw new Error(`User with ID: ${userId} not found`);
+            return res.status(200).json({ data: userModel });
+        } catch (err) {
+            return res.status(400).json({ error: err.message });
+        }
+    };
+
+    // Delete an user
+    async delete(req, res) {
+        try {
+            const userId = req.params.userId;
+            console.log(userId);
+            if(!userId || userId === ":userId"){
+                return res.status(400).json({
+                    error: "Missing required fields"
+                });
+            };
+            const userModel = await UserModel.findOneAndDelete(userId);
+            if (!userModel) throw new Error(`User not found`);
+            return res.status(200).json({ message: `User deleted successfully` });
+        } catch (err) {
+            if(err.message === "User not found"){
+                return res.status(404).json({
+                    error: `User not found`
+                });
+            }
+            return res.status(400).json({ error: err.message });
+        }
+    };
+
+    // Update an user
+    async update(req, res) {
+        try {
+            const userId = req.params.userId;
+            const { username, email } = req.body;
+
+            if(!username || !email){
+                return res.status(400).json({
+                    error: "Missing required fields"
+                });
+            };
+        
+            const userModel = await UserModel.findOneAndUpdate(
+                {_id: userId}, 
+                {username, email}
+            );
+
+            console.log(userModel);
+            if (!userModel) throw new Error(`User not found`);
+            return res.status(200).json({ message: `User updated successfully` });
+        } catch (err) {
+            if(err.message === "User not found"){
+                return res.status(404).json({
+                    error: `User not found`
+                });
+            }
+            return res.status(400).json({ error: err.message });
         }
     };
 
