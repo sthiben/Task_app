@@ -56,7 +56,6 @@ class UserController {
     async delete(req, res) {
         try {
             const userId = req.params.userId;
-            console.log(userId);
             if(!userId || userId === ":userId"){
                 return res.status(400).json({
                     error: "Missing required fields"
@@ -87,19 +86,27 @@ class UserController {
                 });
             };
 
-            const hashedPassword = await encryptPassword(password)
+            const userFounded = await UserModel.findOne({userId});
+            
+            if(!userFounded){
+                throw new Error(`User with ID: ${userId} not found`);
+            };
                     
             const userModel = await UserModel.findOneAndUpdate(
                 {_id: userId}, 
-                {username, email, password:hashedPassword}
+                {username, email, password},
+                {
+                    new: true,
+                    runValidators: true,
+                    upsert: false
+                }
             );
 
-            if (!userModel) throw new Error(`User not found`);
             return res.status(200).json({ message: `User updated successfully`, data:userModel });
         } catch (err) {
-            if(err.message === "User not found"){
+            if(err.message.includes("User with ID:")){
                 return res.status(404).json({
-                    error: `User not found`
+                    error: err.message
                 });
             }
             return res.status(400).json({ error: err.message });

@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Connect to MongoDB
-// connectDB(); // Call the connection function
+connectDB(); // Call the connection function
 
 // Use routes
 app.use('/api', authRouter);
