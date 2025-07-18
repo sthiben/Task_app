@@ -1,3 +1,4 @@
+import { encryptPassword } from '../library/appBCrypt.js';
 import UserModel from '../models/user.model.js'; //Import the UserModel
 import dotenv from 'dotenv';
 
@@ -78,22 +79,23 @@ class UserController {
     async update(req, res) {
         try {
             const userId = req.params.userId;
-            const { username, email } = req.body;
+            const { username, email, password } = req.body;
 
-            if(!username || !email){
+            if(!username || !email || !password){
                 return res.status(400).json({
                     error: "Missing required fields"
                 });
             };
-        
+
+            const hashedPassword = await encryptPassword(password)
+                    
             const userModel = await UserModel.findOneAndUpdate(
                 {_id: userId}, 
-                {username, email}
+                {username, email, password:hashedPassword}
             );
 
-            console.log(userModel);
             if (!userModel) throw new Error(`User not found`);
-            return res.status(200).json({ message: `User updated successfully` });
+            return res.status(200).json({ message: `User updated successfully`, data:userModel });
         } catch (err) {
             if(err.message === "User not found"){
                 return res.status(404).json({
