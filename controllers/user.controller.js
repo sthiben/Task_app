@@ -38,6 +38,42 @@ class UserController {
             res.status(400).json({ error: err.message });
         }
     };
+    async showById(req, res) {
+        try {
+            const userId = req.params.userId;
+            const userModel = await UserModel.findById(userId);
+            if (!userModel) throw new Error('User not found');
+            return res.status(200).json({ data: userModel });
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    };
+    async delete(req, res) {
+        try {
+            const deletedUser = await UserModel.findOneAndDelete({
+                _id: req.params.id
+            });
+            if (!deletedUser) {
+                return res.status(404).json({ error: 'User not updated' });
+            }
+            res.status(200).json({ message: 'Deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ error: 'Error deleting user' });
+        }
+    }
+
+
+    async update(req, res) {
+        try {
+            const userId = req.params.userId;
+            const body = { username, email }
+            const userModel = await UserModel.findOneAndDelete(userId, body);
+            if (!userModel) throw new Error('User not found');
+            return res.status(200).json({ data: userModel });
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    };
 
 };
 
