@@ -1,6 +1,6 @@
 import TaskModel from '../models/task.model.js'; // Import the user model
 import { mongoose } from '../config/db/connection.js'; // Import mongoose from the connection
-import taskModel from '../models/task.model.js';
+import { findFileByName } from '../controllers/file.controller.js';
 
 class TaskController {
     // Create a new task
@@ -237,21 +237,23 @@ class TaskController {
     async addFile(req, res) {
         try {
             // Assuming multer uploaded the file and we have the info in req.file
-            const { name, extension, type, size, url } = req.body;
-            if (!name || !extension || !type || !size || !url) {
-                return res.status(400).json({ error: 'File information is incomplete' });
-            }
+            // const { name, extension, type, size, url } = req.body;
+            // if (!name || !extension || !type || !size || !url) {
+            //     return res.status(400).json({ error: 'File information is incomplete' });
+            // }
+
+            const {name} = req.body;
+
+            const fileFounded = await findFileByName(name);
+
+            console.log(fileFounded);
+            
+
             const task = await TaskModel.findByIdAndUpdate(
                 req.params.taskId,
                 {
                     $push: {
-                        files: {
-                            name: name,
-                            url: url,
-                            type: type,
-                            extension: extension,
-                            size: size
-                        }
+                        files: fileFounded
                     }
                 },
                 { new: true }
