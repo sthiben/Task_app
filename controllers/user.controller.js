@@ -61,7 +61,7 @@ class UserController {
                     error: "Missing required fields"
                 });
             };
-            const userModel = await UserModel.findOneAndDelete(userId);
+            const userModel = await UserModel.findByIdAndDelete(userId);
             if (!userModel) throw new Error(`User not found`);
             return res.status(200).json({ message: `User deleted successfully` });
         } catch (err) {

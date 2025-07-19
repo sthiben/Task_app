@@ -12,5 +12,9 @@ router.route(name)
     .get(TaskController.findTasks);
 
 router.get(`${name}/:taskId`, TaskController.findTaskById);
+router.delete(`${name}/:taskId`, TaskController.deleteFile);
+router.put(`${name}/:taskId`, TaskController.udpateTask);
+router.post(`${name}/comment/:taskId`, TaskController.addComment);
+router.post(`${name}/file/:taskId`, TaskController.addFile);
 
 export default router;

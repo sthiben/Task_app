@@ -80,32 +80,32 @@ class TaskController {
         }
     }
 
-    async findTasks(req, res){
-        try{
+    async findTasks(req, res) {
+        try {
             const taskModel = await TaskModel.find();
             return res.status(200).json({
                 message: "Tasks retrieved successfully",
                 data: taskModel
             })
-        }catch(error){
+        } catch (error) {
             return res.status(500).json({
                 error: "Internal server error"
             });
         }
     }
 
-    async findTaskById(req, res){
-        try{
+    async findTaskById(req, res) {
+        try {
             const taskId = req.params.taskId;
             console.log(taskId);
-            if(!taskId || taskId === ":taskId"){
+            if (!taskId || taskId === ":taskId") {
                 return res.status(400).json({
                     error: "Required fields are missing"
                 });
             };
 
-            const taskFounded = await TaskModel.findOne({taskId});
-            if(!taskFounded){
+            const taskFounded = await TaskModel.findById(taskId);
+            if (!taskFounded) {
                 throw new Error(`Task with ID: ${taskId} not found`);
             }
 
@@ -113,9 +113,10 @@ class TaskController {
                 message: "Task retrieved successfully",
                 data: taskFounded
             });
-            
-        }catch(error){
-            if(error.message.includes("not found")){
+
+        } catch (error) {
+            console.log(error);
+            if (error.message.includes("not found")) {
                 return res.status(404).json({
                     error: error.message
                 });
@@ -123,7 +124,143 @@ class TaskController {
             return res.status(500).json({
                 error: "Internal server error"
             });
+        };
+    }
+
+    async deleteFile(req, res) {
+        try {
+            const taskId = req.params.taskId;
+            if (!taskId || taskId === ":taskId") {
+                return res.status(400).json({
+                    error: "Required fields are missing"
+                });
+            };
+
+            const taskToDelete = await TaskModel.findByIdAndDelete(taskId);
+            console.log("Esto retorna taskToDelete", taskToDelete)
+            if (!taskToDelete) throw new Error("Tasks not found");
+
+            return res.status(200).json({
+                message: "Task deleted successfully"
+            });
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                error: "Internal server error"
+            });
+        };
+    }
+
+    async udpateTask(req, res) {
+        try {
+            const taskId = req.params.taskId;
+
+            const taskObject = req.body;
+
+            if (!taskId || taskId === ":taskId") {
+                return res.status(400).json({
+                    error: "Required fields are missing"
+                });
+            };
+
+            if (!taskObject.type || !taskObject.dateStart || !taskObject.dateEnd || !taskObject.createdBy) {
+                return res.status(400).json({
+                    error: "Missing required fields"
+                });
+            };
+
+            const taskToUpdate = await TaskModel.findByIdAndUpdate(
+                taskId,
+                { $set: taskObject },
+                {
+                    new: true,
+                    runValidators: true,
+                    upsert: false
+                }
+            );
+
+            if (!taskToUpdate) throw new Error("Update process failed");
+            console.log(taskToUpdate);
+            return res.status(200).json({
+                message: "Task updated successfully",
+                data: taskToUpdate
+            });
+        } catch (error) {
+            console.log(error);
+            if (error.message.includes("failed")) {
+                return res.status(404).json({
+                    error: error.message
+                });
+            };
+            return res.status(500).json({
+                error: "Internal server error"
+            });
+        }
+    }
+    // Add comment to a task
+    async addComment(req, res) {
+        try {
+            const { userId, name, text } = req.body;
+            // Validate required fields
+            if (!userId || !name || !text) {
+                return res.status(400).json({ error: 'User ID, name, and text are required' });
+            }
+            // Find the task and add the comment
+            const task = await TaskModel.findById(req.params.taskId);
+
+            if (!task) {
+                return res.status(404).json({ error: 'Task not found' });
+            }
+            // Check if the comment already exists
+            const existingComment = task.comments.find(comment => comment.userId.toString() === userId && comment.text === text);
+            if (existingComment) {
+                return res.status(400).json({ error: 'Comment already exists' });
+            }
+            // Add the comment
+            task.comments.push({
+                userId: userId,
+                name: name,
+                text: text,
+                date: new Date()
+            });
+            // Save the updated task
+            await task.save();
+
+            // Return the updated task
+            res.status(200).json(task);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
     };
+
+    async addFile(req, res) {
+        try {
+            // Assuming multer uploaded the file and we have the info in req.file
+            const { name, extension, type, size, url } = req.body;
+            if (!name || !extension || !type || !size || !url) {
+                return res.status(400).json({ error: 'File information is incomplete' });
+            }
+            const task = await TaskModel.findByIdAndUpdate(
+                req.params.taskId,
+                {
+                    $push: {
+                        files: {
+                            name: name,
+                            url: url,
+                            type: type,
+                            extension: extension,
+                            size: size
+                        }
+                    }
+                },
+                { new: true }
+            );
+
+            res.status(200).json(task);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
     }
 }
 
