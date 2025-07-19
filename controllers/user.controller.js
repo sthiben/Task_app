@@ -86,7 +86,7 @@ class UserController {
                 });
             };
 
-            const userFounded = await UserModel.findOne({userId});
+            const userFounded = await UserModel.findById(userId);
             
             if(!userFounded){
                 throw new Error(`User with ID: ${userId} not found`);
