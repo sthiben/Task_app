@@ -14,7 +14,7 @@ router.route(`${name}`)
   .get(fileController.getFiles); //search files
 
 router.route(`${name}/download/:filename`)
-  .get(fileController.downloadFile); // download file
+  .get(fileController.downloadfile); // download file
 
 router.route(`${name}/:filename`)
   .get(fileController.getFile) // get file details for name

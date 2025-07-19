@@ -126,4 +126,5 @@ export const fileController = {
             res.status(500).json({ error: 'Error downloading file.' });
         }
     }
-}
+};
+
