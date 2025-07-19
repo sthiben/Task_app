@@ -1,4 +1,4 @@
-import transporter from '../config/email/emailConfig.js';
+import transporter from '../config/email/emailconfig.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import ejs from 'ejs';
