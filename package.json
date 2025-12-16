@@ -1,12 +1,16 @@
 {
-  "name": "task_app",
+  "name": "gym_app",
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "db:clean": "node scripts/cleanDatabase.js",
+    "db:clean:all": "node scripts/cleanDatabase.js --all",
+    "db:seed:admin": "node scripts/createAdmin.js",
+    "db:drop:tasks": "node scripts/dropTasksCollection.js"
   },
   "keywords": [],
   "author": "",
@@ -14,15 +18,12 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.0",
-    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.16.4",
-    "multer": "^2.0.2",
-    "nodemailer": "^7.0.5"
+    "mongoose": "^8.16.4"
   },
   "devDependencies": {
     "@types/express": "5.0.3",

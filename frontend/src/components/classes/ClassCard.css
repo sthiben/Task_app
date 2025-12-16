@@ -1,0 +1,207 @@
+/* Class Card Component Styles */
+.class-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  border-left: 4px solid;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.class-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.class-card-header {
+  margin-bottom: var(--spacing-sm);
+}
+
+.class-card-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.class-card-status {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.class-card-status-select {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.class-card-status-select:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.class-card-status-select option {
+  background: white;
+  color: var(--text-dark);
+  text-transform: none;
+}
+
+.class-card-type {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.class-card-status-container {
+  margin-bottom: var(--spacing-md);
+}
+
+.class-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-medium);
+  flex: 1;
+}
+
+.class-card-info .label {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-right: var(--spacing-sm);
+}
+
+.class-card-instructor {
+  display: flex;
+  align-items: center;
+}
+
+.class-card-dates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.class-card-enrollment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.class-card-enrollment .full {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.class-card-enrollment .available {
+  color: var(--success);
+}
+
+/* Action Buttons */
+.class-card-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.class-card-actions button {
+  flex: 1;
+  font-size: var(--font-size-sm);
+}
+
+/* Priority Indicator */
+.class-card-priority {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-sm);
+}
+
+.class-card-priority.alta {
+  background-color: #fee;
+  color: var(--danger);
+}
+
+.class-card-priority.media {
+  background-color: #fef3c7;
+  color: var(--warning);
+}
+
+.class-card-priority.baja {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767px) {
+  .class-card {
+    padding: var(--spacing-md);
+  }
+
+  .class-card-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .class-card-actions {
+    flex-direction: column;
+  }
+
+  .class-card-actions button {
+    width: 100%;
+  }
+
+  .class-card-info {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .class-card {
+    padding: var(--spacing-lg);
+  }
+
+  .class-card-title {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .class-card:hover {
+    transform: translateY(-6px);
+  }
+}

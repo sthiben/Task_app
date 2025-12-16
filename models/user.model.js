@@ -5,6 +5,12 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  phone: { type: String },
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+  membershipType: { type: String, enum: ['Básica', 'Premium', 'VIP'], default: 'Básica' },
+  membershipStartDate: { type: Date, default: Date.now },
+  membershipEndDate: { type: Date },
+  isActive: { type: Boolean, default: true }
 });
 
 // Middleware for password hashing

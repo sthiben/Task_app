@@ -1,0 +1,109 @@
+/* Classes Page Styles */
+.classes-page {
+  min-height: 100vh;
+  background-color: var(--bg-light);
+}
+
+.classes-container {
+  max-width: var(--max-width-xl);
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-md);
+}
+
+.classes-header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.header-text {
+  flex: 1;
+  min-width: 250px;
+}
+
+.classes-header h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.classes-header p {
+  color: var(--text-medium);
+  font-size: var(--font-size-base);
+  margin: 0;
+}
+
+.success-message {
+  background-color: var(--success);
+  color: white;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: var(--shadow-md);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767px) {
+  .classes-container {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+
+  .classes-header {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .classes-header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .classes-header p {
+    font-size: var(--font-size-sm);
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .header-content button {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .classes-container {
+    padding: var(--spacing-xl) var(--spacing-lg);
+  }
+
+  .classes-header h1 {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+@media (min-width: 1024px) {
+  .classes-container {
+    padding: var(--spacing-2xl) var(--spacing-xl);
+  }
+}

@@ -1,0 +1,58 @@
+/* Loader Component Styles */
+.loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+}
+
+.loader-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 9999;
+}
+
+.loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loader Sizes */
+.loader-small .loader-spinner {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+}
+
+.loader-large .loader-spinner {
+  width: 60px;
+  height: 60px;
+  border-width: 5px;
+}
+
+/* Responsive Loader Adjustments */
+@media (max-width: 767px) {
+  .loader-container {
+    padding: var(--spacing-lg);
+  }
+
+  .loader-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+  }
+}

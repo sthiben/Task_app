@@ -41,9 +41,9 @@ class UserController {
     async showById(req, res) {
         try {
             const userId = req.params.userId;
-            const userModel = await UserModel.findById(userId);
+            const userModel = await UserModel.findById(userId).select('-password');
             if (!userModel) throw new Error('User not found');
-            return res.status(200).json({ data: userModel });
+            return res.status(200).json(userModel);
         } catch (err) {
             res.status(400).json({ error: err.message });
         }
@@ -66,14 +66,106 @@ class UserController {
     async update(req, res) {
         try {
             const userId = req.params.userId;
-            const body = { username, email }
-            const userModel = await UserModel.findOneAndDelete(userId, body);
+            const { username, email, phone, membershipType } = req.body;
+            
+            const updateData = {};
+            if (username) updateData.username = username;
+            if (email) updateData.email = email;
+            if (phone !== undefined) updateData.phone = phone;
+            if (membershipType) updateData.membershipType = membershipType;
+            
+            const userModel = await UserModel.findByIdAndUpdate(
+                userId, 
+                updateData,
+                { new: true, runValidators: true }
+            ).select('-password');
+            
             if (!userModel) throw new Error('User not found');
-            return res.status(200).json({ data: userModel });
+            return res.status(200).json(userModel);
         } catch (err) {
             res.status(400).json({ error: err.message });
         }
-    };
+    }
+
+    // AGGREGATIONS
+
+    // Get users by membership type
+    async getUsersByMembership(req, res) {
+        try {
+            const stats = await UserModel.aggregate([
+                {
+                    $group: {
+                        _id: '$membershipType',
+                        count: { $sum: 1 },
+                        activeUsers: {
+                            $sum: { $cond: ['$isActive', 1, 0] }
+                        }
+                    }
+                },
+                {
+                    $sort: { count: -1 }
+                }
+            ]);
+            res.status(200).json(stats);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
+
+    // Get users by role
+    async getUsersByRole(req, res) {
+        try {
+            const stats = await UserModel.aggregate([
+                {
+                    $group: {
+                        _id: '$role',
+                        count: { $sum: 1 }
+                    }
+                }
+            ]);
+            res.status(200).json(stats);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
+
+    // Get user statistics
+    async getUserStats(req, res) {
+        try {
+            const stats = await UserModel.aggregate([
+                {
+                    $facet: {
+                        totalUsers: [
+                            { $count: 'count' }
+                        ],
+                        activeUsers: [
+                            { $match: { isActive: true } },
+                            { $count: 'count' }
+                        ],
+                        byMembership: [
+                            {
+                                $group: {
+                                    _id: '$membershipType',
+                                    count: { $sum: 1 }
+                                }
+                            }
+                        ],
+                        byRole: [
+                            {
+                                $group: {
+                                    _id: '$role',
+                                    count: { $sum: 1 }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]);
+            res.status(200).json(stats[0]);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
 
 };
 

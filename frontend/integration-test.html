@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Test - Gym Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .test-result.pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-result.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-result.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #4338ca;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .summary {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .summary.pass {
+            color: #155724;
+        }
+        .summary.fail {
+            color: #721c24;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏋️ Gym Management System - Integration Tests</h1>
+    
+    <div class="test-section">
+        <h2>Test Configuration</h2>
+        <label>API URL: <input type="text" id="apiUrl" value="http://localhost:3000/api" style="width: 300px;"></label>
+        <br><br>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+        <div id="summary"></div>
+    </div>
+
+    <script>
+        const API_URL = () => document.getElementById('apiUrl').value;
+        let testResults = [];
+        let testUser = {
+            username: 'testuser_' + Date.now(),
+            email: 'test_' + Date.now() + '@example.com',
+            password: 'Test123!@#',
+            phone: '1234567890',
+            membershipType: 'Premium'
+        };
+        let authToken = null;
+        let userId = null;
+        let createdClassId = null;
+
+        function addResult(testName, passed, message, details = null) {
+            testResults.push({ testName, passed, message, details });
+            displayResults();
+        }
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = testResults.map(result => `
+                <div class="test-result ${result.passed ? 'pass' : 'fail'}">
+                    <strong>${result.passed ? '✓' : '✗'} ${result.testName}</strong>
+                    <p>${result.message}</p>
+                    ${result.details ? `<pre>${JSON.stringify(result.details, null, 2)}</pre>` : ''}
+                </div>
+            `).join('');
+
+            const passed = testResults.filter(r => r.passed).length;
+            const failed = testResults.filter(r => !r.passed).length;
+            const summaryDiv = document.getElementById('summary');
+            summaryDiv.innerHTML = `
+                <div class="summary ${failed === 0 ? 'pass' : 'fail'}">
+                    Total: ${testResults.length} | Passed: ${passed} | Failed: ${failed}
+                </div>
+            `;
+        }
+
+        function clearResults() {
+            testResults = [];
+            displayResults();
+        }
+
+        async function runAllTests() {
+            clearResults();
+            addResult('Starting Tests', true, 'Beginning integration test suite...');
+
+            try {
+                // Test 1: User Registration
+                await testRegistration();
+                
+                // Test 2: User Login
+                await testLogin();
+                
+                // Test 3: Verify Token in API Calls
+                await testTokenInclusion();
+                
+                // Test 4: Fetch All Classes
+                await testFetchClasses();
+                
+                // Test 5: Create Class
+                await testCreateClass();
+                
+                // Test 6: Update Class
+                await testUpdateClass();
+                
+                // Test 7: Fetch Class Details
+                await testFetchClassDetails();
+                
+                // Test 8: Add Comment
+                await testAddComment();
+                
+                // Test 9: Fetch User Profile
+                await testFetchProfile();
+                
+                // Test 10: Update User Profile
+                await testUpdateProfile();
+                
+                // Test 11: Logout
+                await testLogout();
+                
+                // Test 12: Verify Unauthorized Access
+                await testUnauthorizedAccess();
+
+                addResult('All Tests Complete', true, 'Integration test suite completed successfully!');
+            } catch (error) {
+                addResult('Test Suite Error', false, 'Test suite encountered an error: ' + error.message);
+            }
+        }
+
+        async function testRegistration() {
+            try {
+                const response = await fetch(`${API_URL()}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testUser)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.message) {
+                    addResult('1. User Registration', true, 'User registered successfully', { email: testUser.email });
+                } else {
+                    addResult('1. User Registration', false, 'Registration failed', data);
+                }
+            } catch (error) {
+                addResult('1. User Registration', false, 'Registration error: ' + error.message);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                const response = await fetch(`${API_URL()}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: testUser.email,
+                        password: testUser.password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    authToken = data.token;
+                    userId = data.user._id;
+                    addResult('2. User Login', true, 'Login successful, token received', { userId });
+                } else {
+                    addResult('2. User Login', false, 'Login failed', data);
+                }
+            } catch (error) {
+                addResult('2. User Login', false, 'Login error: ' + error.message);
+            }
+        }
+
+        async function testTokenInclusion() {
+            if (!authToken) {
+                addResult('3. Token Inclusion', false, 'No auth token available');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL()}/task`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    addResult('3. Token Inclusion', true, 'API call with token successful');
+                } else if (response.status === 401) {
+                    addResult('3. Token Inclusion', false, 'Token not accepted by API');
+                } else {
+                    addResult('3. Token Inclusion', false, 'Unexpected response: ' + response.status);
+                }
+            } catch (error) {
+                addResult('3. Token Inclusion', false, 'Token test error: ' + error.message);
+            }
+        }
+
+        async function testFetchClasses() {
+            if (!authToken) {
+                addResult('4. Fetch Classes', false, 'No auth token available');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL()}/task`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && Array.isArray(data)) {
+                    addResult('4. Fetch Classes', true, `Fetched ${data.length} classes`);
+                } else {
+                    addResult('4. Fetch Classes', false, 'Failed to fetch classes', data);
+                }
+            } catch (error) {
+                addResult('4. Fetch Classes', false, 'Fetch error: ' + error.message);
+            }
+        }
+
+        async function testCreateClass() {
+            if (!authToken || !userId) {
+                addResult('5. Create Class', false, 'No auth token or userId available');
+                return;
+            }
+
+            const classData = {
+                title: 'Test Yoga Class',
+                description: 'Integration test class',
+                type: 'Yoga',
+                priority: 'Alta',
+                color: '#8b5cf6',
+                startDate: new Date().toISOString(),
+                endDate: new Date(Date.now() + 3600000).toISOString(),
+                status: 'Programada',
+                instructor: 'Test Instructor',
+                maxCapacity: 20,
+                notificationEmail: testUser.email,
+                userId: userId,
+                createdBy: userId
+            };
+
+            try {
+                const response = await fetch(`${API_URL()}/task`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(classData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data._id) {
+                    createdClassId = data._id;
+                    addResult('5. Create Class', true, 'Class created successfully', { classId: createdClassId });
+                } else {
+                    addResult('5. Create Class', false, 'Failed to create class', data);
+                }
+            } catch (error) {
+                addResult('5. Create Class', false, 'Create error: ' + error.message);
+            }
+        }
+
+        async function testUpdateClass() {
+            if (!authToken || !createdClassId) {
+                addResult('6. Update Class', false, 'No auth token or class ID available');
+                return;
+            }
+
+            const updateData = {
+                title: 'Updated Test Yoga Class',
+                description: 'Updated description'
+            };
+
+            try {
+                const response = await fetch(`${API_URL()}/task/${createdClassId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.title === updateData.title) {
+                    addResult('6. Update Class', true, 'Class updated successfully');
+                } else {
+                    addResult('6. Update Class', false, 'Failed to update class', data);
+                }
+            } catch (error) {
+                addResult('6. Update Class', false, 'Update error: ' + error.message);
+            }
+        }
+
+        async function testFetchClassDetails() {
+            if (!authToken || !createdClassId) {
+                addResult('7. Fetch Class Details', false, 'No auth token or class ID available');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL()}/task/${createdClassId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data._id === createdClassId) {
+                    addResult('7. Fetch Class Details', true, 'Class details fetched successfully');
+                } else {
+                    addResult('7. Fetch Class Details', false, 'Failed to fetch class details', data);
+                }
+            } catch (error) {
+                addResult('7. Fetch Class Details', false, 'Fetch error: ' + error.message);
+            }
+        }
+
+        async function testAddComment() {
+            if (!authToken || !createdClassId || !userId) {
+                addResult('8. Add Comment', false, 'No auth token, class ID, or user ID available');
+                return;
+            }
+
+            const commentData = {
+                userId: userId,
+                name: testUser.username,
+                text: 'This is a test comment'
+            };
+
+            try {
+                const response = await fetch(`${API_URL()}/task/comment/${createdClassId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(commentData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.comments && data.comments.length > 0) {
+                    addResult('8. Add Comment', true, 'Comment added successfully');
+                } else {
+                    addResult('8. Add Comment', false, 'Failed to add comment', data);
+                }
+            } catch (error) {
+                addResult('8. Add Comment', false, 'Comment error: ' + error.message);
+            }
+        }
+
+        async function testFetchProfile() {
+            if (!authToken || !userId) {
+                addResult('9. Fetch Profile', false, 'No auth token or user ID available');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL()}/user/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data._id === userId) {
+                    addResult('9. Fetch Profile', true, 'Profile fetched successfully');
+                } else {
+                    addResult('9. Fetch Profile', false, 'Failed to fetch profile', data);
+                }
+            } catch (error) {
+                addResult('9. Fetch Profile', false, 'Fetch error: ' + error.message);
+            }
+        }
+
+        async function testUpdateProfile() {
+            if (!authToken || !userId) {
+                addResult('10. Update Profile', false, 'No auth token or user ID available');
+                return;
+            }
+
+            const updateData = {
+                username: testUser.username + '_updated',
+                phone: '9876543210'
+            };
+
+            try {
+                const response = await fetch(`${API_URL()}/user/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.username === updateData.username) {
+                    addResult('10. Update Profile', true, 'Profile updated successfully');
+                } else {
+                    addResult('10. Update Profile', false, 'Failed to update profile', data);
+                }
+            } catch (error) {
+                addResult('10. Update Profile', false, 'Update error: ' + error.message);
+            }
+        }
+
+        async function testLogout() {
+            if (!authToken) {
+                addResult('11. Logout', false, 'No auth token available');
+                return;
+            }
+
+            // Simulate logout by clearing token
+            const tempToken = authToken;
+            authToken = null;
+            
+            addResult('11. Logout', true, 'Logout successful (token cleared)');
+        }
+
+        async function testUnauthorizedAccess() {
+            try {
+                const response = await fetch(`${API_URL()}/task`, {
+                    headers: { 'Authorization': 'Bearer invalid_token' }
+                });
+
+                if (response.status === 401) {
+                    addResult('12. Unauthorized Access', true, 'Correctly rejected unauthorized request');
+                } else {
+                    addResult('12. Unauthorized Access', false, 'Did not reject unauthorized request');
+                }
+            } catch (error) {
+                addResult('12. Unauthorized Access', false, 'Test error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
